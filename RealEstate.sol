@@ -80,6 +80,29 @@ function buyFlat() payable external{
 }
 
 
+function depositFund() payable external{
+
+
+    require(msg.sender != owner,"Owner Cannot Deposit Fund");
+
+    require(block.timestamp > projectEndTime,"Project Has Already Ended");
+
+    require(alreadyBuyer[msg.sender] == true,"You Should Be A Buyer To Deposit Fund");
+
+    require(msg.value > 0,"You Cannot Send 0 Amount Of Money")
+
+    uint index = buyerDetailsIndex[msg.sender];
+
+    buyer memory _buyer = buyerDetails[index];
+
+    require(_buyer.amtRemaining >= msg.value,"You Cannot Send The Amount More Than The Price");
+
+    buyerDetails[index].totalAmtPaid -= msg.value;
+
+    buyerDetails[index].amtRemaining += msg.value;
+
+}
+
 
 
 
