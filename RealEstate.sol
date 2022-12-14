@@ -103,6 +103,26 @@ function depositFund() payable external{
 
 }
 
+function putVote() external{
+
+    require(msg.sender != owner,"Owner Cannot Vote");
+
+    require(alreadyBuyer[msg.sender] == true,"You Cannot Vote As You Are Not A Buyer");
+
+    require(projectEndTime > block.timestamp ,"Project Has Not Ended Yet,You Can Only Vote When The Project Is Over");
+
+    require(block.timestamp > votingEndTime,"Voting Time Has Ended Now");
+
+    require(voted[msg.sender] == false,"You Can Vote Only One Time");
+
+    totalVotes++;
+
+    voted[msg.sender] = true;
+
+
+
+}
+
 
 
 
