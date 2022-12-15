@@ -119,9 +119,38 @@ function putVote() external{
 
     voted[msg.sender] = true;
 
+}
 
+function fundClaimedByUser() external {
+
+    require(msg.sender != owner,"Owner Cannot Call This Function");
+
+    require(alreadyBuyer[msg.sender] == true,"You Should Be A Buyer To Claim The Fund");
+
+    require(block.timestamp > projectEndTime,"Project Has Not Ended Yet");
+
+    require(block.timestamp > votingEndTime,"Voting Time Has Not Ended Yet");
+
+    require(totalVotes < totalBuyers/2,"Majority Doesnt Supports You");
+
+    uint index = buyerDetailsIndex[msg.sender];
+
+    buyer memory _buyer = buyerDetails[index];
+
+    require(_buyer.fundClaimed == false,"You Have Already Claimed The Fund");
+
+    uint amount = _buyer.totalAmtPaid;
+
+    address payable buyerAddress = _buyer.buyer;
+
+    _buyer.totalAmtPaid = 0;
+
+    _buyer.fundClaimed = true;
+
+    buyerAddress.transfer(amount);
 
 }
+
 
 
 
