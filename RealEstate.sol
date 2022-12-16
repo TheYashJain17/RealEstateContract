@@ -121,7 +121,7 @@ function putVote() external{
 
 }
 
-function fundClaimedByUser() external {
+function fundClaimByUser() external {
 
     require(msg.sender != owner,"Owner Cannot Call This Function");
 
@@ -148,6 +148,26 @@ function fundClaimedByUser() external {
     _buyer.fundClaimed = true;
 
     buyerAddress.transfer(amount);
+
+}
+
+function fundClaimByOwner() external {
+
+    require(msg.sender == owner,"Only Owner Can Access This function");
+
+    require(block.timestamp > projectEndTime,"Project Has Not Ended Yet");
+
+    require(block.timestamp > votingEndTime,"Voting Has Not Ended Yet");
+
+    require(totalVotes > totalBuyers/2,"Majority Doesnt Supports You");
+
+    require(fundClaimed == false,"You Have Already Claimed The Fund");
+
+    uint amount = address(this).balance;
+
+    fundClaimed = true;
+
+    owner.transfer(amount);
 
 }
 
