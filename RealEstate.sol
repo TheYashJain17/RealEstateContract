@@ -13,12 +13,12 @@ contract realEstate{
     uint public totalVotes;
     uint public projectEndTime;
     uint public votingEndTime;
-    bool public fundClaimed
+    bool public fundClaimed;
 
 
     struct buyer{
 
-        address payable buyer;
+        address payable buyerAddress;
         uint totalAmtPaid;
         uint amtRemaining;
         bool fundClaimed;
@@ -51,9 +51,11 @@ function buyFlat() payable external{
 
     require(msg.sender != owner,"Owner Cannot Buy Its Own Flat");
 
-    require(block.timestamp > projectEndTime,"Project Has Ended");
+    require(projectEndTime > block.timestamp,"Project Has Ended");
 
-    require(msg.value > 1 ether,"You Cannot Send Less Than 1 Ether Of Amount ");
+    require(flatPrice >= msg.value,"You Cannot Send Amount More Than the Actual Price");
+
+    require(msg.value > 1 ether,"Amount must be more than 1 ether");
     
     require(totalFlats > soldFlats,"Sorry Flats Are Not Available");
 
@@ -62,21 +64,20 @@ function buyFlat() payable external{
 
     buyer memory _buyer = buyer({
 
-        buyer : payable(msg.sender),
-        totalAmtPaid : msg.value;
-        amtRemaining : flatPrice - msg.value;
+        buyerAddress : payable(msg.sender),
+        totalAmtPaid : msg.value,
+        amtRemaining : flatPrice - msg.value,
         fundClaimed : false
 
-    })
+    });
 
     soldFlats++;
     totalBuyers++;
+    alreadyBuyer[msg.sender] = true;
 
     buyerDetails.push(_buyer);
 
-    alreadyBuyer[msg.sender] = true;
-
-
+  
 }
 
 
@@ -89,7 +90,7 @@ function depositFund() payable external{
 
     require(alreadyBuyer[msg.sender] == true,"You Should Be A Buyer To Deposit Fund");
 
-    require(msg.value > 0,"You Cannot Send 0 Amount Of Money")
+    require(msg.value > 0,"You Cannot Send 0 Amount Of Money");
 
     uint index = buyerDetailsIndex[msg.sender];
 
@@ -109,9 +110,9 @@ function putVote() external{
 
     require(alreadyBuyer[msg.sender] == true,"You Cannot Vote As You Are Not A Buyer");
 
-    require(projectEndTime > block.timestamp ,"Project Has Not Ended Yet,You Can Only Vote When The Project Is Over");
+    require(block.timestamp > projectEndTime,"Project Has Not Ended Yet,You Can Only Vote When The Project Is Over");
 
-    require(block.timestamp > votingEndTime,"Voting Time Has Ended Now");
+    require(votingEndTime > block.timestamp,"Voting Time Has Ended Now");
 
     require(voted[msg.sender] == false,"You Can Vote Only One Time");
 
@@ -135,17 +136,15 @@ function fundClaimByUser() external {
 
     uint index = buyerDetailsIndex[msg.sender];
 
-    buyer memory _buyer = buyerDetails[index];
+    require(buyerDetails[index].fundClaimed == false,"You Have Already Claimed The Fund");
 
-    require(_buyer.fundClaimed == false,"You Have Already Claimed The Fund");
+    uint amount = buyerDetails[index].totalAmtPaid;
 
-    uint amount = _buyer.totalAmtPaid;
+    address payable buyerAddress = buyerDetails[index].buyerAddress;
 
-    address payable buyerAddress = _buyer.buyer;
+    buyerDetails[index].totalAmtPaid = 0;
 
-    _buyer.totalAmtPaid = 0;
-
-    _buyer.fundClaimed = true;
+    buyerDetails[index].fundClaimed = true;
 
     buyerAddress.transfer(amount);
 
@@ -170,9 +169,5 @@ function fundClaimByOwner() external {
     owner.transfer(amount);
 
 }
-
-
-
-
 
 }
